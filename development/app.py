@@ -104,3 +104,6 @@ def bebel():
 @app.route('/lady.html')
 def lady():
     return render_template('usuario-08-lady.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=80, debug=True)
