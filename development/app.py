@@ -1,15 +1,20 @@
 from flask import Flask, render_template, request, redirect, url_for
-from flask_mysqldb import MySQL
+import pymysql
 
 app = Flask(__name__)
 
 # conexão com o banco de dados
-app.config['MYSQL_Host'] = 'locahost' # 127.0.0.1
+app.config['MYSQL_HOST'] = '127.0.0.1' # 127.0.0.1 (localhost)
 app.config['MYSQL_USER'] = 'root'
 app.config['MYSQL_PASSWORD'] = 'a1b2c3d4'
-app.config['MYSQL_DB'] = 'contatos'  
+app.config['MYSQL_DB'] = 'contatos'
 
-mysql = MySQL(app)
+mysql_connection = pymysql.connect(
+    host = app.config['MYSQL_HOST'],
+    user = app.config['MYSQL_USER'],
+    password= app.config['MYSQL_PASSWORD'],
+    db = app.config['MYSQL_DB']
+)
 
 @app.route('/contato.html', methods=['GET', 'POST'])  
 def contato():
@@ -22,10 +27,11 @@ def contato():
         assunto = request.form['assunto']
         mensagem = request.form['mensagem']
 
-        cur = mysql.connection.cursor()
+        cur = mysql_connection.cursor()
+
         cur.execute("INSERT INTO recados(nome, apelido, email, crush, assunto, mensagem) VALUES (%s, %s, %s, %s, %s, %s)", (nome, apelido, email, crush, assunto, mensagem))
 
-        mysql.connection.commit()
+        mysql_connection.commit()
 
         cur.close()
 
@@ -35,7 +41,7 @@ def contato():
 
 @app.route('/recados.html')  
 def recados():
-    cur = mysql.connection.cursor()
+    cur = mysql_connection.cursor()
 
     mensagens = cur.execute("SELECT * FROM recados")
 
@@ -55,14 +61,9 @@ def recados():
         cur.close()
     
 
-
 @app.route('/')
 def index():
     return render_template('index.html')
-
-# @app.route('/contato.html')  
-# def contato():
-#     return render_template('contato.html')
 
 @app.route('/machos.html')
 def machos():
